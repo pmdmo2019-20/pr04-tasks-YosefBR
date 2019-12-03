@@ -13,8 +13,9 @@ import es.iessaladillo.pedrojoya.pr04.data.entity.Task
 class TasksActivityViewModel(private val repository: Repository,
                              private val application: Application) : ViewModel() {
 
-    // Estado de la interfaz
+    private val taskIdList: MutableList<Long> = mutableListOf()
 
+    // Estado de la interfaz
     private val _tasks: MutableLiveData<List<Task>> = MutableLiveData()
     val tasks: LiveData<List<Task>>
         get() = _tasks
@@ -55,17 +56,23 @@ class TasksActivityViewModel(private val repository: Repository,
 
     // Hace que se muestre en el RecyclerView todas las tareas.
     fun filterAll() {
-        // TODO
+        _currentFilterMenuItemId.value = R.id.mnuFilterAll
+        _activityTitle.value = application.getString(R.string.tasks_title_all)
+        queryTasks(TasksActivityFilter.ALL)
     }
 
     // Hace que se muestre en el RecyclerView sólo las tareas completadas.
     fun filterCompleted() {
-        // TODO
+        _currentFilterMenuItemId.value = R.id.mnuFilterCompleted
+        _activityTitle.value = application.getString(R.string.tasks_title_completed)
+        queryTasks(TasksActivityFilter.COMPLETED)
     }
 
     // Hace que se muestre en el RecyclerView sólo las tareas pendientes.
     fun filterPending() {
-        // TODO
+        _currentFilterMenuItemId.value = R.id.mnuFilterPending
+        _activityTitle.value = application.getString(R.string.tasks_title_pending)
+        queryTasks(TasksActivityFilter.PENDING)
     }
 
     // Agrega una nueva tarea con dicho concepto. Si la se estaba mostrando
@@ -73,24 +80,39 @@ class TasksActivityViewModel(private val repository: Repository,
     // mostrar en el RecyclerView la lista con todas las tareas, no sólo
     // las completadas.
     fun addTask(concept: String) {
-        // TODO
+        repository.addTask(concept)
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
     }
 
     // Agrega la tarea
     fun insertTask(task: Task) {
-        // TODO
+
     }
 
     // Borra la tarea
-    fun deleteTask(task: Task) {
-        // TODO
+    fun deleteTask(taskId: Int) {
+        repository.deleteTask(taskId)
     }
 
     // Borra todas las tareas mostradas actualmente en el RecyclerView.
     // Si no se estaba mostrando ninguna tarea, se muestra un mensaje
     // informativo en un SnackBar de que no hay tareas que borrar.
     fun deleteTasks() {
-        // TODO
+        if (taskIdList.isEmpty()) {
+            _onShowMessage.value = Event(application.getString(R.string.lis_is_empty))
+        }
+        else {
+            repository.deleteTasks(taskIdList)
+            when {
+                _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+                _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+                else -> queryTasks(TasksActivityFilter.PENDING)
+            }
+        }
     }
 
     // Marca como completadas todas las tareas mostradas actualmente en el RecyclerView,
@@ -98,7 +120,12 @@ class TasksActivityViewModel(private val repository: Repository,
     // Si no se estaba mostrando ninguna tarea, se muestra un mensaje
     // informativo en un SnackBar de que no hay tareas que marcar como completadas.
     fun markTasksAsCompleted() {
-        // TODO
+        repository.markTasksAsCompleted(taskIdList)
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
     }
 
     // Marca como pendientes todas las tareas mostradas actualmente en el RecyclerView,
@@ -106,7 +133,12 @@ class TasksActivityViewModel(private val repository: Repository,
     // Si no se estaba mostrando ninguna tarea, se muestra un mensaje
     // informativo en un SnackBar de que no hay tareas que marcar como pendientes.
     fun markTasksAsPending() {
-        // TODO
+        repository.markTasksAsPending(taskIdList)
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
     }
 
     // Hace que se envíe un Intent con la lista de tareas mostradas actualmente
@@ -117,21 +149,46 @@ class TasksActivityViewModel(private val repository: Repository,
         // TODO
     }
 
+    private fun queryListData(newList: List<Task>) {
+        _tasks.value = newList.sortedByDescending { it.id }
+        taskIdList.clear()
+        tasks.value?.forEach {
+            taskIdList.add(it.id)
+        }
+    }
+
     // Actualiza el estado de completitud de la tarea recibida, atendiendo al
     // valor de isCompleted. Si es true la tarea es marcada como completada y
     // en caso contrario es marcada como pendiente.
     fun updateTaskCompletedState(task: Task, isCompleted: Boolean) {
-        // TODO
+        if (!isCompleted) {
+            repository.markTaskAsCompleted(task.id)
+        }
+        else {
+            repository.markTaskAsPending(task.id)
+        }
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
     }
 
     // Retorna si el concepto recibido es válido (no es una cadena vacía o en blanco)
     fun isValidConcept(concept: String): Boolean {
-        // TODO
+        return concept != ""
     }
 
     // Pide las tareas al repositorio, atendiendo al filtro recibido
     private fun queryTasks(filter: TasksActivityFilter) {
-        // TODO
+        when (filter) {
+            TasksActivityFilter.ALL ->
+                queryListData(repository.queryAllTasks())
+            TasksActivityFilter.COMPLETED ->
+                queryListData(repository.queryCompletedTasks())
+            TasksActivityFilter.PENDING ->
+                queryListData(repository.queryPendingTasks())
+        }
     }
 
 }
