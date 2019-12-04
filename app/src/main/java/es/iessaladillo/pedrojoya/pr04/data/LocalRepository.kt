@@ -37,8 +37,8 @@ object LocalRepository : Repository {
     override fun insertTask(task: Task) {
     }
 
-    override fun deleteTask(taskId: Int) {
-        tasks.removeAt(taskId)
+    override fun deleteTask(taskId: Long) {
+        tasks.remove(tasks.filter { x -> x.id==taskId}.last())
     }
 
     override fun deleteTasks(taskIdList: List<Long>) {

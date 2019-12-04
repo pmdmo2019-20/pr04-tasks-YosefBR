@@ -94,8 +94,13 @@ class TasksActivityViewModel(private val repository: Repository,
     }
 
     // Borra la tarea
-    fun deleteTask(taskId: Int) {
+    fun deleteTask(taskId: Long) {
         repository.deleteTask(taskId)
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
     }
 
     // Borra todas las tareas mostradas actualmente en el RecyclerView.

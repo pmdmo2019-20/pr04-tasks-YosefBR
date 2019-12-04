@@ -21,7 +21,7 @@ interface Repository {
 
     // Borra de la fuente de datos la tarea cuyo id corresponde con
     // el recibido.
-    fun deleteTask(taskId: Int)
+    fun deleteTask(taskId: Long)
     // Borra de la fuente de datos todas las tareas cuyos id estén contenidos
     // en la lista recibida
     fun deleteTasks(taskIdList: List<Long>)

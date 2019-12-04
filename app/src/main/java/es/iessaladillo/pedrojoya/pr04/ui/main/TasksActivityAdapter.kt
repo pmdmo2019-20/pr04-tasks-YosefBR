@@ -18,11 +18,6 @@ class TasksActivityAdapter : RecyclerView.Adapter<TasksActivityAdapter.ViewHolde
     private var data: List<Task> = emptyList()
     var onItemClickListener: ((Int) -> Unit)? = null
 
-    init {
-        setHasStableIds(true)
-    }
-
-
     override fun getItemId(position: Int): Long {
         return data[position].id
     }

@@ -3,6 +3,7 @@ package es.iessaladillo.pedrojoya.pr04.ui.main
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
@@ -62,6 +63,10 @@ class TasksActivity : AppCompatActivity() {
         txtConcept.text.clear()
     }
 
+    private fun deleteTask(task: Task) {
+        viewModel.deleteTask(task.id)
+    }
+
     private fun setupRecyclerView() {
         lstTasks.run {
             setHasFixedSize(true)
@@ -69,7 +74,7 @@ class TasksActivity : AppCompatActivity() {
             addItemDecoration(DividerItemDecoration(context, RecyclerView.VERTICAL))
             itemAnimator = DefaultItemAnimator()
             adapter = listAdapter
-            setOnSwipeListener()
+            setOnSwipeListener { viewHolder, _ -> deleteTask(listAdapter.getItem(viewHolder.adapterPosition))}
         }
     }
 
