@@ -90,14 +90,19 @@ class TasksActivityViewModel(private val repository: Repository,
         filterAll()
     }
 
-    // Agrega la tarea
-    fun insertTask(task: Task) {
-
-    }
-
     // Borra la tarea
     fun deleteTask(taskId: Long) {
         repository.deleteTask(taskId)
+        when {
+            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
+            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
+            else -> queryTasks(TasksActivityFilter.PENDING)
+        }
+    }
+
+    // Agrega la tarea
+    fun insertTask(task: Task) {
+        repository.insertTask(task)
         when {
             _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
             _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
@@ -151,8 +156,39 @@ class TasksActivityViewModel(private val repository: Repository,
     // en el RecyclerView.
     // Si no se estaba mostrando ninguna tarea, se muestra un Snackbar indicando
     // que no hay tareas que compartir.
-    fun shareTasks() {
-        // TODO
+    fun shareTasks(): Intent {
+        //Creamos una lista de strings para guardar las tareas a enviar
+        val listOfTasks = arrayListOf<String>()
+        // taskSave ira guardando todas las tareas visibles
+        var taskSave = ""
+        // tasksToShare sera un string con todas las tareas de listOfTasks con saltos de linea
+        var taskToShare = ""
+        tasks.value?.forEach {
+            //Nos guarda el concepto de la tarea y su estado
+            taskSave += it.concept
+            taskSave += if (it.completed) {
+                " Completado"
+            } else {
+                " Pendiente"
+            }
+            listOfTasks.add(taskSave)
+            //Reiniciamos el string para poder guardar la siguiente tarea
+            taskSave = ""
+        }
+        //Recorremos la lista de Strings para almacenarla en la variable que las enviará con formato
+        listOfTasks.forEach {
+            taskToShare += it + "\n"
+        }
+        //Preparamos y retornamos el intent que será enviado al llamar a StartActivity()
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_SUBJECT, "Tareas")
+            putExtra(Intent.EXTRA_TEXT, taskToShare)
+            type = "text/plain"
+        }
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+        return intent
     }
 
     private fun queryListData(newList: List<Task>) {

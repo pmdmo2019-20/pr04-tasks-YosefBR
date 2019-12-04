@@ -35,6 +35,8 @@ object LocalRepository : Repository {
     }
 
     override fun insertTask(task: Task) {
+        tasks.add(task)
+        id = (tasks.size + 1).toLong()
     }
 
     override fun deleteTask(taskId: Long) {

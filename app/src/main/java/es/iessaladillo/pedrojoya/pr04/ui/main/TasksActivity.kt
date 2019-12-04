@@ -68,7 +68,7 @@ class TasksActivity : AppCompatActivity() {
     private fun deleteTask(task: Task) {
         viewModel.deleteTask(task.id)
         Snackbar.make(lstTasks, getString(R.string.tasks_task_deleted, task.concept), Snackbar.LENGTH_LONG)
-            .setAction(getString(R.string.undo)) { viewModel.addTask(task.concept) }
+            .setAction(getString(R.string.undo)) { viewModel.insertTask(task) }
             .show()
     }
 
@@ -85,7 +85,7 @@ class TasksActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.mnuShare -> viewModel.shareTasks()
+            R.id.mnuShare -> shareTasks()
             R.id.mnuDelete -> deleteTasks()
             R.id.mnuComplete -> markTasksAsCompleted()
             R.id.mnuPending -> markTasksAsPending()
@@ -95,6 +95,15 @@ class TasksActivity : AppCompatActivity() {
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    private fun shareTasks() {
+        if (viewModel.emptyList()) {
+            Snackbar.make(lstTasks, getString(R.string.tasks_no_tasks_to_share), Snackbar.LENGTH_LONG).show()
+        }
+        else {
+            startActivity(viewModel.shareTasks())
+        }
     }
 
     private fun deleteTasks() {
@@ -111,7 +120,7 @@ class TasksActivity : AppCompatActivity() {
             Snackbar.make(lstTasks, getString(R.string.tasks_no_tasks_to_mark_as_completed), Snackbar.LENGTH_LONG).show()
         }
         else {
-            viewModel.deleteTasks()
+            viewModel.markTasksAsCompleted()
         }
     }
 
@@ -120,7 +129,7 @@ class TasksActivity : AppCompatActivity() {
             Snackbar.make(lstTasks, getString(R.string.tasks_no_tasks_to_mark_as_pending), Snackbar.LENGTH_LONG).show()
         }
         else {
-            viewModel.deleteTasks()
+            viewModel.markTasksAsPending()
         }
     }
 
