@@ -9,12 +9,14 @@ import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.observe
 import androidx.recyclerview.widget.*
+import com.google.android.material.snackbar.Snackbar
 import es.iessaladillo.pedrojoya.pr04.R
 import es.iessaladillo.pedrojoya.pr04.data.LocalRepository
 import es.iessaladillo.pedrojoya.pr04.data.entity.Task
 import es.iessaladillo.pedrojoya.pr04.utils.invisibleUnless
 import es.iessaladillo.pedrojoya.pr04.utils.setOnSwipeListener
 import kotlinx.android.synthetic.main.tasks_activity.*
+import kotlinx.android.synthetic.main.tasks_activity_item.*
 
 
 class TasksActivity : AppCompatActivity() {
@@ -65,6 +67,9 @@ class TasksActivity : AppCompatActivity() {
 
     private fun deleteTask(task: Task) {
         viewModel.deleteTask(task.id)
+        Snackbar.make(lstTasks, getString(R.string.tasks_task_deleted, task.concept), Snackbar.LENGTH_LONG)
+            .setAction(getString(R.string.undo)) { viewModel.addTask(task.concept) }
+            .show()
     }
 
     private fun setupRecyclerView() {
@@ -81,15 +86,42 @@ class TasksActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.mnuShare -> viewModel.shareTasks()
-            R.id.mnuDelete -> viewModel.deleteTasks()
-            R.id.mnuComplete -> viewModel.markTasksAsCompleted()
-            R.id.mnuPending -> viewModel.markTasksAsPending()
+            R.id.mnuDelete -> deleteTasks()
+            R.id.mnuComplete -> markTasksAsCompleted()
+            R.id.mnuPending -> markTasksAsPending()
             R.id.mnuFilterAll -> viewModel.filterAll()
             R.id.mnuFilterPending -> viewModel.filterPending()
             R.id.mnuFilterCompleted -> viewModel.filterCompleted()
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    private fun deleteTasks() {
+        if (viewModel.emptyList()) {
+            Snackbar.make(lstTasks, getString(R.string.lis_is_empty), Snackbar.LENGTH_LONG).show()
+        }
+        else {
+            viewModel.deleteTasks()
+        }
+    }
+
+    private fun markTasksAsCompleted() {
+        if (viewModel.emptyList()) {
+            Snackbar.make(lstTasks, getString(R.string.tasks_no_tasks_to_mark_as_completed), Snackbar.LENGTH_LONG).show()
+        }
+        else {
+            viewModel.deleteTasks()
+        }
+    }
+
+    private fun markTasksAsPending() {
+        if (viewModel.emptyList()) {
+            Snackbar.make(lstTasks, getString(R.string.tasks_no_tasks_to_mark_as_pending), Snackbar.LENGTH_LONG).show()
+        }
+        else {
+            viewModel.deleteTasks()
+        }
     }
 
     private fun observeTasks() {
@@ -122,6 +154,5 @@ class TasksActivity : AppCompatActivity() {
             lblEmptyView.invisibleUnless(newList.isEmpty())
         }
     }
-
 }
 

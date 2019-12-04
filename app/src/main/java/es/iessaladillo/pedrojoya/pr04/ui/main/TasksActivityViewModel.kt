@@ -2,9 +2,11 @@ package es.iessaladillo.pedrojoya.pr04.ui.main
 
 import android.app.Application
 import android.content.Intent
+import android.provider.Settings.Global.getString
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.android.material.snackbar.Snackbar
 import es.iessaladillo.pedrojoya.pr04.R
 import es.iessaladillo.pedrojoya.pr04.base.Event
 import es.iessaladillo.pedrojoya.pr04.data.Repository
@@ -75,17 +77,17 @@ class TasksActivityViewModel(private val repository: Repository,
         queryTasks(TasksActivityFilter.PENDING)
     }
 
+    fun emptyList(): Boolean {
+        return taskIdList.isEmpty()
+    }
+
     // Agrega una nueva tarea con dicho concepto. Si la se estaba mostrando
     // la lista de solo las tareas completadas, una vez agregada se debe
     // mostrar en el RecyclerView la lista con todas las tareas, no sólo
     // las completadas.
     fun addTask(concept: String) {
         repository.addTask(concept)
-        when {
-            _activityTitle.value == "Tasks" -> queryTasks(TasksActivityFilter.ALL)
-            _activityTitle.value == "Tasks (completed)" -> queryTasks(TasksActivityFilter.COMPLETED)
-            else -> queryTasks(TasksActivityFilter.PENDING)
-        }
+        filterAll()
     }
 
     // Agrega la tarea
@@ -108,7 +110,6 @@ class TasksActivityViewModel(private val repository: Repository,
     // informativo en un SnackBar de que no hay tareas que borrar.
     fun deleteTasks() {
         if (taskIdList.isEmpty()) {
-            _onShowMessage.value = Event(application.getString(R.string.lis_is_empty))
         }
         else {
             repository.deleteTasks(taskIdList)

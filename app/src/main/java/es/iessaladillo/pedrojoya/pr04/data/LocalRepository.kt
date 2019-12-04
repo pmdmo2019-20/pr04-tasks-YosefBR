@@ -42,8 +42,9 @@ object LocalRepository : Repository {
     }
 
     override fun deleteTasks(taskIdList: List<Long>) {
-        tasks.clear()
-        id = 1
+        for (taskId in taskIdList) {
+            deleteTask(taskId)
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
