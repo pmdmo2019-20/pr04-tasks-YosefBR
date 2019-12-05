@@ -3,7 +3,6 @@ package es.iessaladillo.pedrojoya.pr04.ui.main
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +15,6 @@ import es.iessaladillo.pedrojoya.pr04.data.entity.Task
 import es.iessaladillo.pedrojoya.pr04.utils.invisibleUnless
 import es.iessaladillo.pedrojoya.pr04.utils.setOnSwipeListener
 import kotlinx.android.synthetic.main.tasks_activity.*
-import kotlinx.android.synthetic.main.tasks_activity_item.*
 
 
 class TasksActivity : AppCompatActivity() {
